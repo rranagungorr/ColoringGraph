@@ -1,0 +1,13 @@
+# GA hyper-parameters
+population_size: 120
+generations: 600
+crossover_rate: 0.8              # kept inside uniform crossover
+tournament_size: 2
+
+# adaptive mutation
+mutation_rate_min: 0.005
+mutation_rate_max: 0.15
+diversity_threshold: 0.25
+
+# conflict penalty
+conflict_penalty: 100
