@@ -5,9 +5,12 @@ crossover_rate: 0.8              # kept inside uniform crossover
 tournament_size: 2
 
 # adaptive mutation
-mutation_rate_min: 0.005
-mutation_rate_max: 0.15
+mutation_rate_min: 0.01
+mutation_rate_max: 0.25
 diversity_threshold: 0.25
 
 # conflict penalty
-conflict_penalty: 100
+conflict_penalty: 1000
+
+runs: 1
+elitism_count: 2

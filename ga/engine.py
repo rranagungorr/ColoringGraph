@@ -29,10 +29,9 @@ class GAEngine:
 
     # ------------------------------------------------------------------ #
     def _init_population(self) -> Population:
-        ind = [
-            Solution.random(self.g, max_colors=self.g.n)
-            for _ in range(self.cfg["population_size"])
-        ]
+        ind = [Solution.greedy(self.g)]
+        ind += [Solution.random(self.g, max_colors=self.g.n // 3)
+                for _ in range(self.cfg["population_size"] - 1)]
         return Population(ind)
 
     # ------------------------------------------------------------------ #
@@ -40,13 +39,13 @@ class GAEngine:
         """Linear schedule between min and max based on diversity."""
         lo, hi = self.cfg["mutation_rate_min"], self.cfg["mutation_rate_max"]
         thr = self.cfg["diversity_threshold"]
-        # if diversity <= threshold → use hi, else interpolate down to lo
-        if pop_div <= thr:
+        if pop_div >= thr:
             return hi
-        ratio = (pop_div - thr) / (1 - thr)
-        return hi - ratio * (hi - lo)
+        ratio = pop_div / thr
+        return lo + (hi - lo) * ratio
 
-    # ------------------------------------------------------------------ #
+
+        # ------------------------------------------------------------------ #
     def run(self) -> dict:
         stats = {"best_fit": [], "avg_fit": []}
         generations = self.cfg["generations"]
@@ -81,10 +80,15 @@ class GAEngine:
                 nxt.extend([child1, child2])
 
             # ---------------- elitism ---------------- #
-            elite, _ = self.pop.best()
-            worst_idx = int(np.argmax([s.fitness(self.g, self.penalty) for s in nxt]))
-            nxt[worst_idx] = elite  # keep elite
+            k = self.cfg.get("elitism_count", 1)
 
-            self.pop = Population(nxt)
+            elite_indices = np.argsort(fits)[:k]
+            elites = [self.pop.individuals[i].copy() for i in elite_indices]
+
+            offspring_fits = [s.fitness(self.g, self.penalty) for s in nxt]
+            worst_indices = np.argsort(offspring_fits)[-k:]
+
+            for e, w_idx in zip(elites, worst_indices):
+                nxt[w_idx] = e
 
         return stats

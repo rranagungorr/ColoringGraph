@@ -2,3 +2,5 @@ numpy
 pyyaml
 matplotlib
 tqdm
+pandas
+openpyxl
